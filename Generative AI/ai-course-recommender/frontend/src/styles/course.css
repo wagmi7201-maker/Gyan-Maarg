@@ -1,0 +1,394 @@
+body {
+  background: #020617;
+  color: white;
+  font-family: system-ui;
+  margin: 0;
+}
+
+/* MAIN CONTAINER */
+
+.container {
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 40px 20px;
+}
+
+/* TITLE */
+
+.title {
+  text-align: center;
+
+  margin-bottom: 30px;
+
+  font-size: 36px;
+
+  font-weight: 700;
+}
+
+/* FORM */
+
+.form {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 15px;
+
+  flex-wrap: wrap;
+
+  margin-bottom: 40px;
+}
+
+/* INPUT */
+
+input {
+  width: 260px;
+
+  padding: 15px;
+
+  border-radius: 10px;
+
+  border: none;
+
+  font-size: 15px;
+
+  background: #e5e7eb;
+
+  color: black;
+}
+
+/* BUTTON */
+
+button {
+  padding: 15px 25px;
+
+  background: #2563eb;
+
+  border: none;
+
+  border-radius: 10px;
+
+  color: white;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+/* LOADER */
+
+.loaderRow {
+  display: flex;
+
+  gap: 10px;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+.spinner {
+  width: 18px;
+
+  height: 18px;
+
+  border: 3px solid white;
+
+  border-top: 3px solid transparent;
+
+  border-radius: 50%;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ROADMAP */
+
+.roadmap {
+  max-width: 1000px;
+
+  margin: auto;
+
+  margin-top: 30px;
+
+  position: relative;
+}
+
+/* VERTICAL FLOW LINE */
+
+.roadmap::before {
+  content: "";
+
+  position: absolute;
+
+  left: 35px;
+
+  top: 0;
+
+  bottom: 0;
+
+  width: 3px;
+
+  background: #2563eb;
+}
+
+/* STEP */
+
+.step {
+  display: flex;
+
+  gap: 25px;
+
+  margin: 60px 0;
+
+  align-items: flex-start;
+
+  position: relative;
+}
+
+/* STEP NUMBER */
+
+.circle {
+  min-width: 70px;
+
+  height: 70px;
+
+  background: #2563eb;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 22px;
+
+  font-weight: 700;
+
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+
+  z-index: 2;
+}
+
+/* STEP CARD */
+
+.stepCard {
+  background: #0b1628;
+
+  padding: 30px;
+
+  border-radius: 18px;
+
+  width: 100%;
+
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* TITLES */
+
+.stepCard h2 {
+  margin: 0;
+
+  font-size: 26px;
+}
+
+.stepCard h3 {
+  margin-top: 0;
+
+  color: #60a5fa;
+}
+
+/* DESCRIPTION */
+
+.stepCard p {
+  color: #94a3b8;
+
+  line-height: 1.6;
+}
+
+/* INFO TAGS */
+
+.infoRow {
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 15px;
+}
+
+/* TIME */
+
+.time {
+  background: #78350f;
+
+  padding: 6px 12px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+}
+
+/* LEVEL */
+
+.level {
+  background: #065f46;
+
+  padding: 6px 12px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+}
+
+/* TOPICS */
+
+ul {
+  margin-top: 15px;
+
+  color: #cbd5f5;
+
+  padding-left: 20px;
+}
+
+li {
+  margin: 7px 0;
+}
+
+/* COURSE GRID */
+
+.courseGrid {
+  display: flex;
+
+  gap: 25px;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  margin-top: 25px;
+}
+
+/* COURSE CARD */
+
+.courseCard {
+  background: #13233f;
+
+  padding: 18px;
+
+  border-radius: 14px;
+
+  width: 270px;
+
+  transition: 0.3s;
+
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.courseCard:hover {
+  transform: translateY(-6px);
+
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}
+
+/* COURSE IMAGE */
+
+.courseCard img {
+  width: 100%;
+
+  height: 150px;
+
+  object-fit: cover;
+
+  border-radius: 10px;
+
+  margin-bottom: 10px;
+}
+
+/* COURSE TEXT */
+
+.courseCard h4 {
+  margin: 8px 0;
+
+  font-size: 17px;
+}
+
+.courseCard p {
+  margin: 5px 0;
+
+  color: #cbd5f5;
+
+  font-size: 14px;
+}
+
+/* COURSE BUTTON */
+
+.courseCard a {
+  display: block;
+
+  background: #2563eb;
+
+  padding: 10px;
+
+  text-align: center;
+
+  border-radius: 8px;
+
+  margin-top: 12px;
+
+  color: white;
+
+  text-decoration: none;
+
+  transition: 0.3s;
+
+  font-weight: 600;
+}
+
+.courseCard a:hover {
+  background: #1d4ed8;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+  .container {
+    padding: 20px;
+  }
+
+  .roadmap {
+    width: 100%;
+  }
+
+  .step {
+    flex-direction: column;
+  }
+
+  .roadmap::before {
+    display: none;
+  }
+
+  .circle {
+    margin-bottom: 10px;
+  }
+}
