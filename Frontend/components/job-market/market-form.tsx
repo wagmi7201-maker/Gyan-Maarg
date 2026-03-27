@@ -4,22 +4,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, TrendingUp, AlertCircle, BarChart3 } from "lucide-react"
+import { Loader2, TrendingUp, AlertCircle, BarChart3, Building2, MapPin, Briefcase } from "lucide-react"
 
 type MarketAnalysis = {
-  skills?: {
-    skill: string
-    demand: number
-    salary_range: string
-    jobs_available: number
+  jobs?: {
+    title: string
+    company: string
+    location: string
+    salary: string
+    description: string
+    skills: string[]
+    experience: string
+    logo: string
+    link: string
   }[]
-  career?: {
-    role: string
-    demand: number
-    salary_range: string
-    jobs_available: number
-    growth_rate: string
-  }[]
+  aiRecommendation?: string
   error?: string
 }
 
@@ -31,6 +30,27 @@ export function JobMarketIntelligenceForm() {
   const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null)
   const [error, setError] = useState("")
 
+  const fetchMarketAnalysis = async (inputSkills: string, inputGoal: string) => {
+    const response = await fetch("/api/job-market", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        skills: inputSkills,
+        goal: inputGoal,
+      }),
+    })
+
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Failed to analyze market")
+    }
+
+    return data as MarketAnalysis
+  }
+
   const handleAnalyzeSkills = async () => {
     if (!skills.trim()) return
 
@@ -39,23 +59,11 @@ export function JobMarketIntelligenceForm() {
     setAnalysis(null)
 
     try {
-      const skillsArray = skills
-        .split(",")
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-
-      const mockAnalysis: MarketAnalysis = {
-        skills: skillsArray.map(skill => ({
-          skill,
-          demand: Math.floor(Math.random() * 100) + 50,
-          salary_range: `$${Math.floor(Math.random() * 80000) + 60000} - $${Math.floor(Math.random() * 150000) + 100000}`,
-          jobs_available: Math.floor(Math.random() * 5000) + 1000,
-        }))
-      }
-
-      setAnalysis(mockAnalysis)
+      const result = await fetchMarketAnalysis(skills.trim(), career.trim() || "Software Developer")
+      setAnalysis(result)
     } catch (err) {
-      setError("Failed to analyze market. Please try again.")
+      const reason = err instanceof Error ? err.message : "Unknown error"
+      setError(`Failed to analyze market. ${reason}`)
       console.error("Skills analysis error:", err)
     } finally {
       setLoading(false)
@@ -70,21 +78,11 @@ export function JobMarketIntelligenceForm() {
     setAnalysis(null)
 
     try {
-      const mockAnalysis: MarketAnalysis = {
-        career: [
-          {
-            role: career,
-            demand: Math.floor(Math.random() * 100) + 70,
-            salary_range: `$${Math.floor(Math.random() * 80000) + 80000} - $${Math.floor(Math.random() * 200000) + 120000}`,
-            jobs_available: Math.floor(Math.random() * 8000) + 2000,
-            growth_rate: `${Math.floor(Math.random() * 30) + 10}%`
-          }
-        ]
-      }
-
-      setAnalysis(mockAnalysis)
+      const result = await fetchMarketAnalysis(career.trim(), career.trim())
+      setAnalysis(result)
     } catch (err) {
-      setError("Failed to analyze market. Please try again.")
+      const reason = err instanceof Error ? err.message : "Unknown error"
+      setError(`Failed to analyze market. ${reason}`)
       console.error("Career analysis error:", err)
     } finally {
       setLoading(false)
@@ -98,7 +96,7 @@ export function JobMarketIntelligenceForm() {
     setError("")
   }
 
-  if (analysis && (analysis.skills || analysis.career)) {
+  if (analysis && analysis.jobs) {
     return (
       <div className="space-y-6">
         <div>
@@ -108,76 +106,71 @@ export function JobMarketIntelligenceForm() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          {analysis.skills && (
-            <div className="space-y-4">
-              {analysis.skills.map((item) => (
-                <Card key={item.skill} className="border-accent/20 hover:border-accent/50 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{item.skill}</CardTitle>
-                        <CardDescription className="mt-1">In-demand technical skill</CardDescription>
-                      </div>
-                      <div className="flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1">
-                        <TrendingUp className="h-4 w-4 text-accent" />
-                        <span className="text-sm font-semibold text-accent">{item.demand}%</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="rounded-lg bg-foreground/5 p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Average Salary Range</p>
-                        <p className="font-semibold text-lg">{item.salary_range}</p>
-                      </div>
-                      <div className="rounded-lg bg-foreground/5 p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Active Job Openings</p>
-                        <p className="font-semibold text-lg">{item.jobs_available.toLocaleString()}+</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        {analysis.aiRecommendation && (
+          <Card className="border-accent/20">
+            <CardHeader>
+              <CardTitle className="text-xl">AI Career Analysis</CardTitle>
+              <CardDescription>Generated from your skills, goal, and live jobs data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-6">
+                {analysis.aiRecommendation}
+              </pre>
+            </CardContent>
+          </Card>
+        )}
 
-          {analysis.career && (
-            <div className="space-y-4">
-              {analysis.career.map((item) => (
-                <Card key={item.role} className="border-accent/20 hover:border-accent/50 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{item.role}</CardTitle>
-                        <CardDescription className="mt-1">Career role insights</CardDescription>
-                      </div>
-                      <div className="flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1">
-                        <TrendingUp className="h-4 w-4 text-accent" />
-                        <span className="text-sm font-semibold text-accent">{item.demand}%</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="rounded-lg bg-foreground/5 p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Salary Range</p>
-                        <p className="font-semibold text-lg">{item.salary_range}</p>
-                      </div>
-                      <div className="rounded-lg bg-foreground/5 p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Open Positions</p>
-                        <p className="font-semibold text-lg">{item.jobs_available.toLocaleString()}+</p>
-                      </div>
-                      <div className="rounded-lg bg-foreground/5 p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Growth Rate</p>
-                        <p className="font-semibold text-lg text-accent">{item.growth_rate}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <div className="space-y-4">
+          {analysis.jobs.map((job, index) => (
+            <Card key={`${job.title}-${job.company}-${index}`} className="border-accent/20 hover:border-accent/50 transition-colors">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-xl">{job.title}</CardTitle>
+                    <CardDescription className="mt-2 flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      {job.company}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1">
+                    <TrendingUp className="h-4 w-4 text-accent" />
+                    <span className="text-sm font-semibold text-accent">{job.salary}</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-3">
+                  <div className="rounded-lg bg-foreground/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Location</p>
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      {job.location}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-foreground/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Experience</p>
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <Briefcase className="h-4 w-4" />
+                      {job.experience}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-foreground/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Skills</p>
+                    <p className="text-sm font-semibold">{job.skills.length ? job.skills.join(", ") : "Software"}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{job.description}</p>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    if (job.link) window.open(job.link, "_blank")
+                  }}
+                >
+                  Apply Now
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <div className="flex gap-3 pt-4">

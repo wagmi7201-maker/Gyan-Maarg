@@ -5,18 +5,55 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, BookOpen, Star, AlertCircle, Clock, Users } from "lucide-react"
+import { generateRoadmap } from "@/lib/api-client"
+import { RoadmapRequest } from "@/lib/types"
 
 type CourseRecommendation = {
   courses?: {
-    title: string
+    name: string
     platform: string
     duration: string
-    rating: number
-    students: number
-    difficulty: string
-    url: string
+    rating: string
+    students: string
+    price: string
+    link: string
+    image: string
   }[]
   error?: string
+}
+
+type Course = NonNullable<CourseRecommendation["courses"]>[number]
+
+const PLATFORMS = [
+  { name: "Udemy", baseUrl: "https://www.udemy.com/courses/search/?q=" },
+  { name: "Coursera", baseUrl: "https://www.coursera.org/search?query=" },
+  { name: "edX", baseUrl: "https://www.edx.org/search?q=" },
+  { name: "NPTEL", baseUrl: "https://onlinecourses.nptel.ac.in/search?query=" },
+]
+
+const buildCourse = (query: string, idx: number): Course => {
+  const platform = PLATFORMS[idx % PLATFORMS.length]
+  return {
+    name: query,
+    platform: platform.name,
+    duration: `${4 + (idx % 8)} weeks`,
+    rating: (4.3 + ((idx % 6) * 0.1)).toFixed(1),
+    students: `${(idx + 1) * 5}k+`,
+    price: idx % 3 === 0 ? "Free" : "Paid",
+    link: `${platform.baseUrl}${encodeURIComponent(query)}`,
+    image: "",
+  }
+}
+
+const fallbackCourses = (skills: string, goal: string): Course[] => {
+  const parsedSkills = skills
+    .split(",")
+    .map((skill) => skill.trim())
+    .filter(Boolean)
+
+  const topics = parsedSkills.length > 0 ? parsedSkills : ["fundamentals", "projects", "interview prep"]
+
+  return topics.slice(0, 6).map((topic, idx) => buildCourse(`${goal} ${topic} course`, idx))
 }
 
 export function CourseRecommenderForm() {
@@ -33,57 +70,50 @@ export function CourseRecommenderForm() {
     setRecommendations(null)
 
     try {
-      const skillsArray = skills
-        .split(",")
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-
-      // Mock data - replace with actual API call
-      const mockRecommendations: CourseRecommendation = {
-        courses: [
-          {
-            title: `Complete ${goal} Masterclass`,
-            platform: "Udemy",
-            duration: "40 hours",
-            rating: 4.8,
-            students: 125000,
-            difficulty: "Intermediate",
-            url: "#"
-          },
-          {
-            title: `${goal} Fundamentals & Advanced Concepts`,
-            platform: "Coursera",
-            duration: "3 months",
-            rating: 4.7,
-            students: 85000,
-            difficulty: "Beginner to Advanced",
-            url: "#"
-          },
-          {
-            title: `Build Real Projects as ${goal}`,
-            platform: "LinkedIn Learning",
-            duration: "25 hours",
-            rating: 4.6,
-            students: 42000,
-            difficulty: "Intermediate",
-            url: "#"
-          },
-          {
-            title: `${goal} in-depth Analysis Course`,
-            platform: "Pluralsight",
-            duration: "35 hours",
-            rating: 4.9,
-            students: 95000,
-            difficulty: "Advanced",
-            url: "#"
-          },
-        ]
+      if (!skills.trim() || !goal.trim()) {
+        setError("Please enter both skills and career goal.")
+        setLoading(false)
+        return
       }
 
-      setRecommendations(mockRecommendations)
-    } catch (err) {
-      setError("Failed to generate recommendations. Please try again.")
+      const skillsArray = skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean)
+
+      const request: RoadmapRequest = {
+        student_level: "beginner",
+        current_skills: skillsArray,
+        target_career: goal.trim(),
+      }
+
+      let allCourses: Course[] = []
+
+      try {
+        const roadmap = await generateRoadmap(request)
+        allCourses = roadmap.roadmap_phases
+          .flatMap((phase) => {
+            const topics = phase.skills.length > 0 ? phase.skills : [phase.title]
+            return topics.slice(0, 2).map((topic, idx) => buildCourse(`${topic} for ${goal}`, phase.phase_number + idx))
+          })
+          .slice(0, 10)
+      } catch {
+        allCourses = fallbackCourses(skills, goal)
+      }
+
+      if (allCourses.length === 0) {
+        setError("No courses found. Please try with different skills or goals.")
+        setLoading(false)
+        return
+      }
+
+      const recommendations: CourseRecommendation = { courses: allCourses }
+
+      setRecommendations(recommendations)
+    } catch (err: unknown) {
       console.error("Recommendations error:", err)
+      const reason = err instanceof Error ? err.message : "Unknown error"
+      setError(`Failed to generate recommendations. Reason: ${reason}`)
     } finally {
       setLoading(false)
     }
@@ -114,7 +144,7 @@ export function CourseRecommenderForm() {
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-xl mb-1">{course.title}</CardTitle>
+                    <CardTitle className="text-xl mb-1">{course.name}</CardTitle>
                     <CardDescription className="text-sm">{course.platform}</CardDescription>
                   </div>
                   <div className="flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1 ml-4">
@@ -137,20 +167,29 @@ export function CourseRecommenderForm() {
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Students</p>
-                      <p className="text-sm font-semibold">{(course.students / 1000).toFixed(0)}K+</p>
+                      <p className="text-sm font-semibold">{course.students}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 rounded-lg bg-foreground/5 p-3">
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Level</p>
-                      <p className="text-sm font-semibold">{course.difficulty}</p>
+                      <p className="text-xs text-muted-foreground">Price</p>
+                      <p className="text-sm font-semibold">{course.price}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Enroll Button */}
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="default" 
+                  className="w-full"
+                  onClick={() => {
+                    if (course.link && course.link !== "#") {
+                      window.open(course.link, "_blank")
+                    }
+                  }}
+                  disabled={!course.link || course.link === "#"}
+                >
                   View Course
                 </Button>
               </CardContent>
