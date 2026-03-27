@@ -1,14 +1,14 @@
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
-import { LoginForm } from "@/components/auth/login-form"
+import { SignupForm } from "@/components/auth/signup-form"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Sign In | Gyan-Maarg",
-  description: "Sign in to your Gyan-Maarg account",
+  title: "Sign Up | Gyan-Maarg",
+  description: "Create your Gyan-Maarg account and start your personalized learning journey",
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
@@ -18,15 +18,15 @@ export default function LoginPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Welcome Back
+              Join Gyan-Maarg
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Sign in to continue your learning journey
+              Begin your AI-guided career journey today
             </p>
           </div>
 
-          {/* Login Form */}
-          <LoginForm />
+          {/* Signup Form */}
+          <SignupForm />
         </div>
       </main>
       
