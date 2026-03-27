@@ -20,7 +20,8 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
-    "https://gyan-maarg.onrender.com",
+    "gyan-maarg.onrender.com",
+    "ss-supplement-website.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
@@ -87,7 +88,9 @@ CORS_ALLOW_CREDENTIALS = True
 # ---------------------------------------------------------------------------
 
 CSRF_TRUSTED_ORIGINS = [
-    "gyan-maarg.vercel.app",
+    "https://www.sssupplement.com",
+    "https://ss-supplement-website.vercel.app",
+    "https://gyan-maarg.vercel.app",
     "https://gyan-maarg.onrender.com",
 ]
 
